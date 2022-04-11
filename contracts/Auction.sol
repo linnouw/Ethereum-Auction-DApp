@@ -57,15 +57,6 @@ contract Auction {
         _;
     }
 
-    modifier auctionOver() {
-         if (block.timestamp >= auctionEnd) {
-            STATE = auctionState.OVER;
-            emit AuctionOverEvent( "This auction is over",  myNewAuction.name, myNewAuction.description, auctionEnd, STATE);
-        }
-        require(block.timestamp >= auctionEnd, "this auction is still running");
-        _;
-    }
-
     modifier auctionBidders() {
         require(bidders.length >0, "there is no bidders");
         _;
@@ -119,7 +110,9 @@ contract Auction {
     function returnTime() public virtual returns (uint256) {}
     function returnContents() public virtual returns 
          (address, string memory, string memory, uint256, uint256, uint256, uint256, auctionState){}
-    function bidEnd() payable public virtual returns(address){}
+    function transferHighestBid() payable public virtual auctionBidders returns(bool){}
+    function refundBidders() payable public virtual auctionBidders returns(bool){}
+
 
     
     /**
@@ -133,8 +126,7 @@ contract Auction {
     event ProviderWithdrawsEvent(string message, uint256 highestBid, address sender);
     event BidderWithdrawsEvent(string message, uint256 bid, address sender);
     event HighestBidderEvent(string message, address sender);
-    event AuctionOver(string message, address sender);
-
+    
 }
 
 contract MyAuction is Auction {
@@ -149,7 +141,7 @@ contract MyAuction is Auction {
         myNewAuction.minIncrement = _minIncrement;
 
         auctionStart = block.timestamp;
-        auctionEnd = auctionStart + (_auctionDuration * 3600);
+        auctionEnd = auctionStart + (_auctionDuration * 60);
 
         STATE = auctionState.STARTED;
         //emit CreatedEvent("Auction Created for: " , auctionOwner , block.timestamp);
@@ -167,7 +159,7 @@ contract MyAuction is Auction {
         return true; // Successful execution
     }
 
-   /* function withdrawWinnings () public override withdrawWinChecks returns (bool)
+   function withdrawWinnings () public override withdrawWinChecks returns (bool)
     {
         ended = true;
 
@@ -177,7 +169,7 @@ contract MyAuction is Auction {
         STATE = auctionState.FINALISED;
         emit ProviderWithdrawsEvent("Provider withdraws: ", highestBid, msg.sender); // Announce winnings withdrawn
         return true;
-    }*/
+    }
 
     /*function withdrawBid() public payable override withdrawBidChecks returns (bool)
     { 
@@ -221,21 +213,28 @@ contract MyAuction is Auction {
         return bids[_sender];
     }
 
-    function endAuction() payable public auctionOver auctionBidders returns(address){
+    function transferHighestBid() payable public virtual override auctionBidders returns(bool){
+       
+        /*transfer highest bid to auction owner*/
+        recipient = myNewAuction.owner;
+        recipient.transfer(highestBid);
+        return true;
+
+    }
+
+    function refundBidders() payable public virtual override auctionBidders returns(bool){
+         /*refund bidders*/
         if (bidders.length> 1) {
-            for (uint256 i = 0; i < bidders.length - 2; i++) {
-                payable(bidders[i]).transfer(
+            for (uint256 i = 0; i < bidders.length - 1; i++) {
+                recipient = payable(bidders[i]);
+                recipient.transfer(
                     bids[bidders[i]]
                 );
             }
         }
-        if (bidders.length > 0) {
-            auctionOwner.transfer(
-                highestBid
-            );
-        }
-        emit AuctionOver("The winner of the auction is", highestBidder);
-        return highestBidder;
+        return true;
+        
+        
     }
 
 }
