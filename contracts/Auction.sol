@@ -112,6 +112,9 @@ contract Auction {
          (address, string memory, string memory, uint256, uint256, uint256, uint256, auctionState){}
     function transferHighestBid() payable public virtual auctionBidders returns(bool){}
     function refundBidders() payable public virtual auctionBidders returns(bool){}
+    function setFinalised() payable public virtual returns(bool){}
+    function returnState() public virtual returns (auctionState) {}
+
 
 
     
@@ -159,7 +162,7 @@ contract MyAuction is Auction {
         return true; // Successful execution
     }
 
-   function withdrawWinnings () public override withdrawWinChecks returns (bool)
+   /*function withdrawWinnings () public override withdrawWinChecks returns (bool)
     {
         ended = true;
 
@@ -169,7 +172,7 @@ contract MyAuction is Auction {
         STATE = auctionState.FINALISED;
         emit ProviderWithdrawsEvent("Provider withdraws: ", highestBid, msg.sender); // Announce winnings withdrawn
         return true;
-    }
+    }*/
 
     /*function withdrawBid() public payable override withdrawBidChecks returns (bool)
     { 
@@ -216,8 +219,12 @@ contract MyAuction is Auction {
     function transferHighestBid() payable public virtual override auctionBidders returns(bool){
        
         /*transfer highest bid to auction owner*/
+        ended = true;
+        
         recipient = myNewAuction.owner;
         recipient.transfer(highestBid);
+        STATE=auctionState.OVER;
+        emit ProviderWithdrawsEvent("Provider withdraws: ", highestBid, msg.sender); // Announce winnings withdrawn
         return true;
 
     }
@@ -233,8 +240,16 @@ contract MyAuction is Auction {
             }
         }
         return true;
-        
-        
     }
+
+    function setFinalised() payable public virtual override auctionBidders returns(bool){
+        STATE = auctionState.FINALISED;
+        return true;
+    }
+
+    function returnState() public view override returns (auctionState) {
+        return STATE;
+    }
+
 
 }
