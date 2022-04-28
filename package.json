@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "@truffle/hdwallet-provider": "^2.0.6",
     "solc": "^0.8.13",
+    "truffle-hdwallet-provider": "^1.0.17",
     "web3": "^1.7.1",
     "zeppelin-solidity": "^1.8.0"
   }

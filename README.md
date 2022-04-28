@@ -20,4 +20,5 @@ Create a new workspace, click add project and import truffle-config.js file.
 Start the project
 `truffle migrate --reset`
 
+Copy "Auction.json", "AuctionList.json" & "MyAuction.json" files in ethereum-auction-app/buil\contracts under react-auction-app/src/abi.
 Start React-auction-app next.

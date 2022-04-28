@@ -1,3 +1,7 @@
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+const privateKey =
+  "15a9585045221a85581752456438e9e9139a81870bc52cd0cd249e9d46f28fe6";
+const deploymentAddress = "0xdaaB166DCeDdA39d5f9D88d712a5bb48E78b3728";
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -46,6 +50,19 @@ module.exports = {
       port: 7545, // Standard Ethereum port (default: none)
       network_id: "*", // Any network (default: none)
     },
+    // rinkeby: {
+    //   provider: function () {
+    //     return new HDWalletProvider(
+    //       privateKey,
+    //       "https://rinkeby.infura.io/v3/c028fca8afac41e7ab5140d07cfb5fa5"
+    //     );
+    //   },
+    //   networkCheckTimeoutnetworkCheckTimeout: 10000,
+    //   gas: 5500000,
+    //   timeoutBlocks: 2000,
+    //   network_id: 4,
+    //   skipDryRun: true,
+    // },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
