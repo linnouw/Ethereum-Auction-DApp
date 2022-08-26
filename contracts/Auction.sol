@@ -7,6 +7,7 @@ contract Auction {
     uint256 public auctionEnd; // End epoch time
     bool public ended;
 
+
     uint256 public oneWei = 1000000000000000000;
     uint256 public highestBid; // Highest amount bid in Eth
     address payable public  highestBidder; // Highest bidder
@@ -19,6 +20,8 @@ contract Auction {
     enum auctionState {STARTED, OVER, FINALISED, CANCELLED}
     auctionState public STATE; // Auction state (STARTED)
 
+    string ipfs;
+
     struct NewAuction {
         address payable owner;
         string name;
@@ -26,6 +29,7 @@ contract Auction {
         uint256 startingPrice;
         uint256 auctionDuration;
         uint256 minIncrement;
+        string ipfsHash;
     }
 
     NewAuction public myNewAuction;
@@ -112,11 +116,8 @@ contract Auction {
          (address, string memory, string memory, uint256, uint256, uint256, uint256, auctionState){}
     function transferHighestBid() payable public virtual auctionBidders returns(bool){}
     function refundBidders() payable public virtual auctionBidders returns(bool){}
-    function setFinalised() payable public virtual returns(bool){}
     function returnState() public virtual returns (auctionState) {}
-
-
-
+    function getIpfsHash() public virtual returns(string memory){}
     
     /**
         Events
@@ -124,7 +125,7 @@ contract Auction {
     event CreatedEvent(string message, address payable owner, uint256 time);
     event BidEvent(address indexed highestBidder, uint256 highestBid, address sender);
     event AuctionDetailsEvent( string name,  string description, uint256 startingPrice, uint256 auctionDuration, 
-                               uint256 minIncrement, uint256 auctionStart, uint256 auctionEnd, auctionState state);
+                               uint256 minIncrement, string ipfsHash, uint256 auctionStart, uint256 auctionEnd, auctionState state);
     event AuctionOverEvent( string message, string name, string description, uint256 auctionEnd, auctionState state);
     event ProviderWithdrawsEvent(string message, uint256 highestBid, address sender);
     event BidderWithdrawsEvent(string message, uint256 bid, address sender);
@@ -133,7 +134,7 @@ contract Auction {
 }
 
 contract MyAuction is Auction {
-    constructor( address payable _owner, string memory _name, string memory _description, uint256 _startingPrice, uint256 _auctionDuration, uint256 _minIncrement) {
+    constructor( address payable _owner, string memory _name, string memory _description, uint256 _startingPrice, uint256 _auctionDuration, uint256 _minIncrement, string memory _ipfsHash) {
         auctionOwner == _owner;
 
         myNewAuction.owner = _owner;
@@ -142,6 +143,7 @@ contract MyAuction is Auction {
         myNewAuction.startingPrice = _startingPrice;
         myNewAuction.auctionDuration = _auctionDuration;
         myNewAuction.minIncrement = _minIncrement;
+        myNewAuction.ipfsHash = _ipfsHash;
 
         auctionStart = block.timestamp;
         auctionEnd = auctionStart + (_auctionDuration * 60);
@@ -149,7 +151,7 @@ contract MyAuction is Auction {
         STATE = auctionState.STARTED;
         //emit CreatedEvent("Auction Created for: " , auctionOwner , block.timestamp);
         emit AuctionDetailsEvent(myNewAuction.name, myNewAuction.description,  myNewAuction.startingPrice, _auctionDuration,
-                                 myNewAuction.minIncrement, auctionStart, auctionEnd, STATE );
+                                 myNewAuction.minIncrement, myNewAuction.ipfsHash, auctionStart, auctionEnd, STATE );
     }
 
     function bid() payable public override notOwner validAuction validBid returns (bool)
@@ -209,7 +211,7 @@ contract MyAuction is Auction {
         returns (address, string memory, string memory, uint256, uint256, uint256, uint256, auctionState)
     {
         return (myNewAuction.owner, myNewAuction.name, myNewAuction.description,  myNewAuction.startingPrice,
-                myNewAuction.auctionDuration, myNewAuction.minIncrement, auctionEnd, STATE );
+                myNewAuction.auctionDuration, myNewAuction.minIncrement, auctionEnd, STATE);
     }
 
     function returnSenderBid(address _sender) public view returns(uint256){
@@ -242,14 +244,13 @@ contract MyAuction is Auction {
         return true;
     }
 
-    function setFinalised() payable public virtual override auctionBidders returns(bool){
-        STATE = auctionState.FINALISED;
-        return true;
-    }
-
     function returnState() public view override returns (auctionState) {
         return STATE;
     }
 
+    function getIpfsHash() public view override returns (string memory){
+        return myNewAuction.ipfsHash;
+     
+    }
 
 }

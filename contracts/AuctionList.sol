@@ -13,6 +13,7 @@ contract AuctionList {
         uint256 startingPrice;
         uint256 auctionDuration;
         uint256 minIncrement;
+        string ipfsHash;
     }
     Details public newDetails;
     Details[] details;
@@ -23,7 +24,8 @@ contract AuctionList {
         string memory _description,
         uint256 _startingPrice,
         uint256 _auctionDuration,
-        uint256 _minIncrement
+        uint256 _minIncrement,
+        string memory _ipfsHash
     ) public payable{
         MyAuction newAuction = new MyAuction(
             _owner,
@@ -31,7 +33,8 @@ contract AuctionList {
             _description,
             _startingPrice,
             _auctionDuration,
-            _minIncrement
+            _minIncrement,
+            _ipfsHash
         );
         newDetails.owner = _owner;
         newDetails.name = _name;
@@ -39,6 +42,7 @@ contract AuctionList {
         newDetails.startingPrice = _startingPrice;
         newDetails.auctionDuration = _auctionDuration;
         newDetails.minIncrement = _minIncrement;
+        newDetails.ipfsHash = _ipfsHash;
 
 
         details.push(newDetails);
